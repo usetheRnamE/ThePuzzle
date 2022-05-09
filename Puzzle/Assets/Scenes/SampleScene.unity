@@ -643,6 +643,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5547204028605475658, guid: 6958d981140650c459a2f72d0855535c, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 5547204028605475663, guid: 6958d981140650c459a2f72d0855535c, type: 3}
       propertyPath: m_Name
       value: ColoredComponent

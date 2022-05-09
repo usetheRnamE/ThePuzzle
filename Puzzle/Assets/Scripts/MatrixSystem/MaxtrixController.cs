@@ -5,91 +5,94 @@ namespace MatrixSystem
 {
     public class MaxtrixController : MonoBehaviour
     {
-        // private GameObject[,] linksMatrix;
         private GameObject[,] slotsMatrix;
 
         private GameObject rowGameObject;
 
-        // Start is called before the first frame update
+        private const byte inLineNeighborCount = 2;
+
         private void Start()
         {
             MatrixSet();
         }
 
-        // Update is called once per frame
-        private void Update()
-        {
-
-        }
-
-
         private void MatrixSet()
         {
-            int rowNum = transform.childCount; // num of rows
-            int slotsNum = transform.GetChild(0).transform.childCount; // num of slots in each row
+            byte rowNum = (byte)transform.childCount; // num of rows
+            byte slotsNum = (byte)transform.GetChild(0).transform.childCount; // num of slots in each row
 
             GameObject slotGameObject;
 
             slotsMatrix = new GameObject[rowNum, slotsNum];
 
-            for (int j = 0; j < rowNum; j++)
+            for (byte y = 0; y < rowNum; y++)
             {
-                rowGameObject = transform.GetChild(j).gameObject;
+                rowGameObject = transform.GetChild(y).gameObject;
 
-                for (int i = 0; i < slotsNum; i++)
+                for (byte x = 0; x < slotsNum; x++)
                 {
-                    slotGameObject = rowGameObject.transform.GetChild(i).gameObject;
+                    slotGameObject = rowGameObject.transform.GetChild(x).gameObject;
 
                     if (slotGameObject != null)
                     {
-                        slotsMatrix[j, i] = slotGameObject;
+                        slotsMatrix[y, x] = slotGameObject;
 
                         if (slotGameObject.GetComponent<SlotController>().useDefaultState)
-                            slotGameObject.GetComponent<SlotController>().slotState = 0;
+                            slotGameObject.GetComponent<SlotController>().slotState = 0;                     
                     }
                 }
             }
+
+            MatrixUpdate();
         }
         private void MatrixUpdate()
         {
-            for (int j = 0; j < slotsMatrix.GetLength(1); j++)
+            for (byte y = 0; y < slotsMatrix.GetLength(1); y++)
             {
-                for (int i = 0; i < slotsMatrix.GetLength(0); i++)
+                for (byte x = 0; x < slotsMatrix.GetLength(0); x++)
                 {
-                        SlotController currentSlotController = slotsMatrix[j, i].GetComponent<SlotController>();
-
-                       for (int k = 0; k < currentSlotController.slotLinks.Length; k++)
-                       {
-                          if(k < 2 && slotsMatrix[j - 1 + k, i]  != null && currentSlotController.slotState == slotsMatrix[j - 1 + k, i].GetComponent<SlotController>().slotState)
-                          {
-                            // get linked
-                          }
-
-                         else if (k >= 2 && slotsMatrix[j, i - 3 + k] != null && currentSlotController.slotState == slotsMatrix[j, i - 3 + k].GetComponent<SlotController>().slotState)
-                         {
-                            // get linked
-                         } 
-
-                         else if(slotsMatrix[j - 1 + k, i] == null)
-                         {
-                            // disable this link
-                         }
-
-                        else if (slotsMatrix[j, i - 3 + k] == null)
-                        {
-                            // disable this link
-                        }
-
-                        else
-                        {
-                            // set link state to 0 (default)
-                        }
-
-                    }
-                       // if(slotsMatrix[previousSlotInColumn, i] != null && slotsMatrix[previousSlotInColumn, i].GetComponent<SlotController>().slotState == slotsMatrix[j, i].GetComponent<SlotController>().slotState)
+                    LinksCheck(slotsMatrix[y, x].GetComponent<SlotController>(), x, y);
                 }
             }
         }
 
+        private void LinksCheck(SlotController currentSlotController, byte xMatrixIndex, byte yMatrixIndex)
+        {
+            GameObject rowNeighbor, columnNeighbor;
+
+            sbyte xNeighborIndex, yNeighborIndex;    
+
+            for (byte linkNum = 0; linkNum < currentSlotController.slotLinks.Length; linkNum++)
+            {
+                xNeighborIndex = (sbyte) (xMatrixIndex - 1 + linkNum);
+                yNeighborIndex = (sbyte) (yMatrixIndex - 3 + linkNum);
+          
+                if (linkNum < 2 && xNeighborIndex >= 0 && xNeighborIndex < inLineNeighborCount)
+                {
+                    if (xNeighborIndex == xMatrixIndex)
+                        xNeighborIndex++;
+
+                    rowNeighbor = slotsMatrix[yMatrixIndex, xNeighborIndex];
+
+                    if (currentSlotController.slotState == rowNeighbor.GetComponent<SlotController>().slotState)
+                        currentSlotController.GetLinked(linkNum, rowNeighbor.GetComponent<SlotController>().slotState);
+                }
+
+                else if (linkNum >= 2 && yNeighborIndex >= 0 && yNeighborIndex < inLineNeighborCount)
+                {
+                    if (yNeighborIndex == yMatrixIndex)
+                        yNeighborIndex++;
+
+                    columnNeighbor = slotsMatrix[yNeighborIndex, xMatrixIndex];
+
+                    if (currentSlotController.slotState == columnNeighbor.GetComponent<SlotController>().slotState)
+                        currentSlotController.GetLinked(linkNum, columnNeighbor.GetComponent<SlotController>().slotState);
+                }
+                else 
+                { 
+                    currentSlotController.LinkDisable(linkNum);
+                }
+            }
+        }
     }
 }
