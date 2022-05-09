@@ -1,10 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
+using UnityEngine.EventSystems;
+using UnityEngine.Events;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace SlotSystem
 {
-    public class SlotController : MonoBehaviour
+    public class SlotController : MonoBehaviour, IPointerClickHandler
     {
         [HideInInspector]
         public byte slotState; //0 - default; 1 - first colot; 2 - second color
@@ -14,7 +15,16 @@ namespace SlotSystem
         [HideInInspector]
         public GameObject[] slotLinks;
 
-        private const byte colorCount = 3; 
+        private const byte colorCount = 3;
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (eventData.button == PointerEventData.InputButton.Left)
+                ColorModify(1, gameObject);
+
+            else if (eventData.button == PointerEventData.InputButton.Right)
+                ColorModify(2, gameObject);
+        }
 
         public void LinkDisable(byte linkToDisableNum)
         {
@@ -30,7 +40,7 @@ namespace SlotSystem
         {
             for (int i = 0; i < colorCount; i++)
                 if (parent.transform.GetChild(i).gameObject.activeSelf)
-                    parent.transform.GetChild(colorState).gameObject.SetActive(false);
+                    parent.transform.GetChild(i).gameObject.SetActive(false);
 
             parent.transform.GetChild(colorState).gameObject.SetActive(true);
         } 
