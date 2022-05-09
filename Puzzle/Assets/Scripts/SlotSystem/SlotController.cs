@@ -1,7 +1,7 @@
 using UnityEngine.EventSystems;
-using UnityEngine.Events;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
+using MatrixSystem;
 
 namespace SlotSystem
 {
@@ -17,13 +17,20 @@ namespace SlotSystem
 
         private const byte colorCount = 3;
 
+        [HideInInspector]
+        public byte xIdInMatrix, yIdInMatrix;  
         public void OnPointerClick(PointerEventData eventData)
         {
+            if (!useDefaultState)
+                return;
+
             if (eventData.button == PointerEventData.InputButton.Left)
-                ColorModify(1, gameObject);
+                ColorModify(1, gameObject.transform);
 
             else if (eventData.button == PointerEventData.InputButton.Right)
-                ColorModify(2, gameObject);
+                ColorModify(2, gameObject.transform);
+
+            MatrixController.matrixControllerInstance.LinksCheck(this, xIdInMatrix, yIdInMatrix);
         }
 
         public void LinkDisable(byte linkToDisableNum)
@@ -33,16 +40,23 @@ namespace SlotSystem
 
         public void GetLinked(byte linkToTied, byte colorState)
         {
-           ColorModify(colorState, slotLinks[linkToTied]);
+           ColorModify(colorState, slotLinks[linkToTied].transform);
         }
 
-        private void ColorModify(byte colorState, GameObject parent)
+        private void ColorModify(byte colorState, Transform parentTransform)
         {
-            for (int i = 0; i < colorCount; i++)
-                if (parent.transform.GetChild(i).gameObject.activeSelf)
-                    parent.transform.GetChild(i).gameObject.SetActive(false);
+            bool isAlreadyActive = parentTransform.GetChild(colorState).gameObject.activeSelf;
 
-            parent.transform.GetChild(colorState).gameObject.SetActive(true);
+            for (int i = 0; i < colorCount; i++)
+            {
+                  if (parentTransform.GetChild(i).gameObject.activeSelf)
+                        parentTransform.GetChild(i).gameObject.SetActive(false);
+            }
+            
+            if(colorState != 0 && isAlreadyActive)
+               parentTransform.GetChild(0).gameObject.SetActive(true);
+            else
+                parentTransform.GetChild(colorState).gameObject.SetActive(true);
         } 
     }
 }
