@@ -3,10 +3,7 @@ using UnityEngine;
 
 namespace SlotSystem {
     public class LinkAttacher : MonoBehaviour
-    {
-        [HideInInspector]
-        public byte linksState; //0 - default; 1 - first colot; 2 - second color
-
+    {       
         private SlotController slotControllerInstance;
 
         private void Start()

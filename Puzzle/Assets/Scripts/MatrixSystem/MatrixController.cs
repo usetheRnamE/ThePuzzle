@@ -67,7 +67,7 @@ namespace MatrixSystem
 
         public void LinksCheck(SlotController currentSlotController, byte xMatrixIndex, byte yMatrixIndex)
         {
-            GameObject rowNeighbor, columnNeighbor;
+            SlotController rowNeighborSlotController, columnNeighborSlotController;
 
             sbyte xNeighborIndex, yNeighborIndex;    
 
@@ -81,10 +81,13 @@ namespace MatrixSystem
                     if (xNeighborIndex == xMatrixIndex)
                         xNeighborIndex++;
 
-                    rowNeighbor = slotsMatrix[yMatrixIndex, xNeighborIndex];
+                    rowNeighborSlotController = slotsMatrix[yMatrixIndex, xNeighborIndex].GetComponent<SlotController>();
 
-                    if (currentSlotController.slotState == rowNeighbor.GetComponent<SlotController>().slotState)
-                        currentSlotController.GetLinked(linkNum, rowNeighbor.GetComponent<SlotController>().slotState);
+                    if (currentSlotController.slotState == rowNeighborSlotController.slotState)
+                    {
+                        currentSlotController.GetLinked(linkNum, currentSlotController.slotState);
+                        rowNeighborSlotController.GetLinked((byte)(linkNum == 0 ? 1 : 0), currentSlotController.slotState);
+                    }
                 }
 
                 else if (linkNum >= 2 && yNeighborIndex >= 0 && yNeighborIndex < inLineNeighborCount)
@@ -92,10 +95,13 @@ namespace MatrixSystem
                     if (yNeighborIndex == yMatrixIndex)
                         yNeighborIndex++;
 
-                    columnNeighbor = slotsMatrix[yNeighborIndex, xMatrixIndex];
+                    columnNeighborSlotController = slotsMatrix[yNeighborIndex, xMatrixIndex].GetComponent<SlotController>();
 
-                    if (currentSlotController.slotState == columnNeighbor.GetComponent<SlotController>().slotState)
-                        currentSlotController.GetLinked(linkNum, columnNeighbor.GetComponent<SlotController>().slotState);
+                    if (currentSlotController.slotState == columnNeighborSlotController.slotState)
+                    {
+                        currentSlotController.GetLinked(linkNum , currentSlotController.slotState);
+                        columnNeighborSlotController.GetLinked((byte)(linkNum == 2 ? 3 : 2), currentSlotController.slotState);
+                    }
                 }
                 else 
                 { 
