@@ -1030,7 +1030,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 071ab730713cd074d972959a00f069f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  linksState: 0
 --- !u!1 &4710985572227624529
 GameObject:
   m_ObjectHideFlags: 0
@@ -1396,7 +1395,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5547204028605475656}
   - component: {fileID: 5547204028605475659}
-  - component: {fileID: 3627712992223786776}
+  - component: {fileID: 8864071399313691661}
   m_Layer: 5
   m_Name: ColoredComponent
   m_TagString: Untagged
@@ -1435,7 +1434,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5547204028605475663}
   m_CullTransparentMesh: 1
---- !u!114 &3627712992223786776
+--- !u!114 &8864071399313691661
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1444,12 +1443,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 5547204028605475663}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ad44588ac9d1a241ab0dd4782e6f782, type: 3}
+  m_Script: {fileID: 11500000, guid: 35e083330535fb44cbfbdcdde0a9db33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slotState: 0
-  useDefaultState: 0
-  slotLinks: []
+  coloredSlotState: 1
+  coloredSlotLinks: []
+  xColoredIdInMatrix: 0
+  yColoredIdInMatrix: 0
 --- !u!1 &7161714427942170270
 GameObject:
   m_ObjectHideFlags: 0

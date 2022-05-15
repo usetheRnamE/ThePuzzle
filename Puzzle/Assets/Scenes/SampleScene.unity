@@ -651,7 +651,12 @@ PrefabInstance:
       propertyPath: m_Name
       value: ColoredComponent
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 8864071399313691661, guid: 6958d981140650c459a2f72d0855535c, type: 3}
+      propertyPath: slotState
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 3627712992223786776, guid: 6958d981140650c459a2f72d0855535c, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 6958d981140650c459a2f72d0855535c, type: 3}
 --- !u!1001 &738831341
 PrefabInstance:
@@ -770,6 +775,7 @@ GameObject:
   - component: {fileID: 774519863}
   - component: {fileID: 774519864}
   - component: {fileID: 774519865}
+  - component: {fileID: 774519866}
   m_Layer: 5
   m_Name: Grid
   m_TagString: Untagged
@@ -835,6 +841,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ab13198b42af7504a85e082d00efc667, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &774519866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 774519862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cd6481918514f64182543574f876d02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &1138491813

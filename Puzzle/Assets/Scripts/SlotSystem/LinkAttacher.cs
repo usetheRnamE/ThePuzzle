@@ -4,16 +4,18 @@ using UnityEngine;
 namespace SlotSystem {
     public class LinkAttacher : MonoBehaviour
     {       
-        private SlotController slotControllerInstance;
+        private dynamic slotController;
 
         private void Start()
         {
-            slotControllerInstance = transform.GetComponentInParent<SlotController>();
+            slotController = transform.GetComponentInParent<SlotController>();
+            slotController ??= transform.GetComponentInParent<ColoredSlotController>();
 
-            slotControllerInstance.slotLinks = new GameObject[transform.childCount];
 
-            for (int i = 0; i < transform.childCount; i++)
-                slotControllerInstance.slotLinks[i] = transform.GetChild(i).gameObject;
+                slotController.slotLinks = new GameObject[transform.childCount];
+
+                for (int i = 0; i < transform.childCount; i++)
+                    slotController.slotLinks[i] = transform.GetChild(i).gameObject;
         }
     }
 }

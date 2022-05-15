@@ -5,35 +5,52 @@ namespace MatrixSystem
 {
     public class MatrixController : MonoBehaviour
     {
+        #region Singleton
+        private static MatrixController instance = null;
+        private static readonly object padlock = new object();
+
+        public static MatrixController Instance
+        {
+            get
+            {
+                lock (padlock)
+                {
+                    instance ??= new MatrixController();
+
+                    return instance;
+                }
+            }
+        }
+        #endregion
+
+        private const int linksInArray = 4;
+
         private GameObject[,] slotsMatrix;
 
         private GameObject rowGameObject;
 
-        private const byte inLineNeighborCount = 2;
+        private const int inLineNeighborCount = 2;
 
-        public static MatrixController matrixControllerInstance; //Singleton pattern cuz only one matrix in the game
+        int xNeighborIndex, yNeighborIndex;
 
         private void Start()
         {
-            matrixControllerInstance = this;
-
             MatrixSet();
         }
-
         private void MatrixSet()
         {
-            byte rowNum = (byte)transform.childCount; // num of rows
-            byte slotsNum = (byte)transform.GetChild(0).transform.childCount; // num of slots in each row
+            int rowNum = transform.childCount; // num of rows
+            int slotsNum = transform.GetChild(0).transform.childCount; // num of slots in each row
 
             GameObject slotGameObject;
 
             slotsMatrix = new GameObject[rowNum, slotsNum];
 
-            for (byte y = 0; y < rowNum; y++)
+            for (int y = 0; y < rowNum; y++)
             {
                 rowGameObject = transform.GetChild(y).gameObject;
 
-                for (byte x = 0; x < slotsNum; x++)
+                for (int x = 0; x < slotsNum; x++)
                 {
                     slotGameObject = rowGameObject.transform.GetChild(x).gameObject;
 
@@ -41,52 +58,51 @@ namespace MatrixSystem
                     {
                         slotsMatrix[y, x] = slotGameObject;
 
-                        SlotController slotController = slotGameObject.GetComponent<SlotController>();
+                        dynamic slotController = slotGameObject.GetComponent<SlotController>();
+                        slotController ??= slotGameObject.GetComponent<ColoredSlotController>();
 
                         slotController.xIdInMatrix = x;
-                        slotController.yIdInMatrix = y;
-
-                        if (slotController.useDefaultState)
-                            slotController.slotState = 0;                     
+                        slotController.yIdInMatrix = y;               
                     }
                 }
             }
 
             MatrixUpdate();
         }
+
         private void MatrixUpdate()
         {
-            for (byte y = 0; y < slotsMatrix.GetLength(1); y++)
+            for (int y = 0; y < slotsMatrix.GetLength(1); y++)
             {
-                for (byte x = 0; x < slotsMatrix.GetLength(0); x++)
+                for (int x = 0; x < slotsMatrix.GetLength(0); x++)
                 {
-                    LinksCheck(slotsMatrix[y, x].GetComponent<SlotController>(), x, y);
+                    LinksCheck(slotsMatrix[y, x], x, y);
                 }
             }
         }
 
-        public void LinksCheck(SlotController currentSlotController, byte xMatrixIndex, byte yMatrixIndex)
-        {
-            SlotController rowNeighborSlotController, columnNeighborSlotController;
+        public void LinksCheck(GameObject currentSlot, int xMatrixIndex, int yMatrixIndex)
+        {           
+            dynamic currentSlotController = currentSlot.GetComponent<SlotController>();
+            currentSlotController ??= currentSlot.GetComponent<ColoredSlotController>();
 
-            sbyte xNeighborIndex, yNeighborIndex;    
-
-            for (byte linkNum = 0; linkNum < currentSlotController.slotLinks.Length; linkNum++)
+            for (int linkNum = 0; linkNum < linksInArray; linkNum++)
             {
-                xNeighborIndex = (sbyte) (xMatrixIndex - 1 + linkNum);
-                yNeighborIndex = (sbyte) (yMatrixIndex - 3 + linkNum);
+                xNeighborIndex = (xMatrixIndex - 1 + linkNum);
+                yNeighborIndex = (yMatrixIndex - 3 + linkNum);
           
                 if (linkNum < 2 && xNeighborIndex >= 0 && xNeighborIndex < inLineNeighborCount)
                 {
                     if (xNeighborIndex == xMatrixIndex)
                         xNeighborIndex++;
 
-                    rowNeighborSlotController = slotsMatrix[yMatrixIndex, xNeighborIndex].GetComponent<SlotController>();
+                    dynamic rowNeighborController = slotsMatrix[yMatrixIndex, xNeighborIndex].GetComponent<SlotController>();
+                    rowNeighborController ??= slotsMatrix[yMatrixIndex, xNeighborIndex].GetComponent<ColoredSlotController>();
 
-                    if (currentSlotController.slotState == rowNeighborSlotController.slotState)
+                    if (currentSlotController.slotState == rowNeighborController.slotState)
                     {
                         currentSlotController.GetLinked(linkNum, currentSlotController.slotState);
-                        rowNeighborSlotController.GetLinked((byte)(linkNum == 0 ? 1 : 0), currentSlotController.slotState);
+                        rowNeighborController.GetLinked((linkNum == 0 ? 1 : 0), currentSlotController.slotState);
                     }
                 }
 
@@ -95,12 +111,13 @@ namespace MatrixSystem
                     if (yNeighborIndex == yMatrixIndex)
                         yNeighborIndex++;
 
-                    columnNeighborSlotController = slotsMatrix[yNeighborIndex, xMatrixIndex].GetComponent<SlotController>();
+                    dynamic columnNeighborSlotController = slotsMatrix[yNeighborIndex, xMatrixIndex].GetComponent<SlotController>();
+                    columnNeighborSlotController ??= slotsMatrix[yMatrixIndex, xNeighborIndex].GetComponent<ColoredSlotController>();
 
                     if (currentSlotController.slotState == columnNeighborSlotController.slotState)
                     {
                         currentSlotController.GetLinked(linkNum , currentSlotController.slotState);
-                        columnNeighborSlotController.GetLinked((byte)(linkNum == 2 ? 3 : 2), currentSlotController.slotState);
+                        columnNeighborSlotController.GetLinked((linkNum == 2 ? 3 : 2), currentSlotController.slotState);
                     }
                 }
                 else 
