@@ -9,6 +9,8 @@ namespace MatrixSystem
         private static MatrixController instance = null;
         private static readonly object padlock = new object();
 
+        private MatrixController() { }
+
         public static MatrixController Instance
         {
             get
@@ -32,6 +34,9 @@ namespace MatrixSystem
         private const int inLineNeighborCount = 2;
 
         int xNeighborIndex, yNeighborIndex;
+
+        SlotController slotController, currentSlotController, rowNeighborController, columnNeighborController;
+        ColoredSlotController coloredSlotController, currentColoredSlotController, rowNeighborColoredController, columnNeighborColoredController;
 
         private void Start()
         {
@@ -58,11 +63,20 @@ namespace MatrixSystem
                     {
                         slotsMatrix[y, x] = slotGameObject;
 
-                        dynamic slotController = slotGameObject.GetComponent<SlotController>();
-                        slotController ??= slotGameObject.GetComponent<ColoredSlotController>();
+                        slotController = slotGameObject.GetComponent<SlotController>();
 
-                        slotController.xIdInMatrix = x;
-                        slotController.yIdInMatrix = y;               
+                        if (slotController != null)
+                        {
+                            slotController.xIdInMatrix = x;
+                            slotController.yIdInMatrix = y;
+                        }
+                        else
+                        {
+                            coloredSlotController = slotGameObject.GetComponent<ColoredSlotController>();
+
+                            coloredSlotController.xIdInMatrix = x;
+                            coloredSlotController.yIdInMatrix = y;
+                        }                       
                     }
                 }
             }
@@ -83,27 +97,23 @@ namespace MatrixSystem
 
         public void LinksCheck(GameObject currentSlot, int xMatrixIndex, int yMatrixIndex)
         {           
-            dynamic currentSlotController = currentSlot.GetComponent<SlotController>();
-            currentSlotController ??= currentSlot.GetComponent<ColoredSlotController>();
-
             for (int linkNum = 0; linkNum < linksInArray; linkNum++)
             {
                 xNeighborIndex = (xMatrixIndex - 1 + linkNum);
                 yNeighborIndex = (yMatrixIndex - 3 + linkNum);
-          
+
+                currentSlotController = currentSlot.GetComponent<SlotController>();
+                currentColoredSlotController = currentSlot.GetComponent<ColoredSlotController>();
+
                 if (linkNum < 2 && xNeighborIndex >= 0 && xNeighborIndex < inLineNeighborCount)
                 {
                     if (xNeighborIndex == xMatrixIndex)
                         xNeighborIndex++;
 
-                    dynamic rowNeighborController = slotsMatrix[yMatrixIndex, xNeighborIndex].GetComponent<SlotController>();
-                    rowNeighborController ??= slotsMatrix[yMatrixIndex, xNeighborIndex].GetComponent<ColoredSlotController>();
+                    rowNeighborController = slotsMatrix[yMatrixIndex, xNeighborIndex].GetComponent<SlotController>();
+                    rowNeighborColoredController = slotsMatrix[yMatrixIndex, xNeighborIndex].GetComponent<ColoredSlotController>();
 
-                    if (currentSlotController.slotState == rowNeighborController.slotState)
-                    {
-                        currentSlotController.GetLinked(linkNum, currentSlotController.slotState);
-                        rowNeighborController.GetLinked((linkNum == 0 ? 1 : 0), currentSlotController.slotState);
-                    }
+                    GetLinkedCheck(linkNum, linkNum == 0 ? 1 : 0, rowNeighborController, rowNeighborColoredController);
                 }
 
                 else if (linkNum >= 2 && yNeighborIndex >= 0 && yNeighborIndex < inLineNeighborCount)
@@ -111,20 +121,51 @@ namespace MatrixSystem
                     if (yNeighborIndex == yMatrixIndex)
                         yNeighborIndex++;
 
-                    dynamic columnNeighborSlotController = slotsMatrix[yNeighborIndex, xMatrixIndex].GetComponent<SlotController>();
-                    columnNeighborSlotController ??= slotsMatrix[yMatrixIndex, xNeighborIndex].GetComponent<ColoredSlotController>();
+                    columnNeighborController = slotsMatrix[yNeighborIndex, xMatrixIndex].GetComponent<SlotController>();
+                    columnNeighborColoredController = slotsMatrix[yNeighborIndex, xMatrixIndex].GetComponent<ColoredSlotController>();
 
-                    if (currentSlotController.slotState == columnNeighborSlotController.slotState)
-                    {
-                        currentSlotController.GetLinked(linkNum , currentSlotController.slotState);
-                        columnNeighborSlotController.GetLinked((linkNum == 2 ? 3 : 2), currentSlotController.slotState);
-                    }
+
+                    GetLinkedCheck(linkNum, linkNum == 2 ? 3 : 2, columnNeighborController, columnNeighborColoredController);
                 }
-                else 
-                { 
-                    currentSlotController.LinkDisable(linkNum);
+                else
+                {
+                    if(currentSlotController != null)
+                       currentSlotController.LinkDisable(linkNum);
+                    else 
+                        currentColoredSlotController.LinkDisable(linkNum);
                 }
             }
         }
+
+       private void GetLinkedCheck(int linkNum, int invertedLinkNum, SlotController neighborSlotController, ColoredSlotController neighborColoredSlotController)
+       {
+
+            if (currentSlotController != null)
+            {
+                if (neighborSlotController != null && currentSlotController.slotState == neighborSlotController.slotState)
+                {
+                    currentSlotController.GetLinked(linkNum, currentSlotController.slotState);
+                    neighborSlotController.GetLinked(invertedLinkNum, currentSlotController.slotState);
+                }
+                else if (rowNeighborController == null && currentSlotController.slotState == neighborColoredSlotController.slotState)
+                {
+                    currentSlotController.GetLinked(linkNum, currentSlotController.slotState);
+                    neighborColoredSlotController.GetLinked(invertedLinkNum, currentSlotController.slotState);
+                }
+            }
+            else
+            {
+                if (neighborSlotController != null && currentColoredSlotController.slotState == neighborSlotController.slotState)
+                {
+                    currentColoredSlotController.GetLinked(linkNum, currentColoredSlotController.slotState);
+                    neighborSlotController.GetLinked(invertedLinkNum, currentColoredSlotController.slotState);
+                }
+                else if (neighborSlotController == null && currentColoredSlotController.slotState == neighborColoredSlotController.slotState)
+                {
+                    currentColoredSlotController.GetLinked(linkNum, currentColoredSlotController.slotState);
+                    neighborColoredSlotController.GetLinked(invertedLinkNum, currentColoredSlotController.slotState);
+                }
+            }
+       }
     }
 }

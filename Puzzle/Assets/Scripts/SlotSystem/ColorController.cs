@@ -1,22 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace SlotSystem
 {
     public class ColorController : MonoBehaviour
     {
-        private const int colorCount = 3;
+        private const int childNum = 0;
 
         private bool isAlreadyActive;
-
-        private bool isSlot;
 
         SlotController slotController;
 
         #region Singleton
         private static ColorController instance = null;
         private static readonly object padlock = new object();
+
+        private ColorController() {}
 
         public static ColorController Instance
         {
@@ -34,35 +35,33 @@ namespace SlotSystem
 
         public void ColorModify(int colorState, Transform parentTransform)
         {
-            isAlreadyActive = parentTransform.GetChild(colorState).gameObject.activeSelf;
+            isAlreadyActive = parentTransform.GetChild(childNum).GetChild(colorState).gameObject.activeSelf;
 
             slotController = parentTransform.GetComponent<SlotController>();
-
-            isSlot = slotController != null;
-
-            for (int i = 0; i < colorCount; i++)
+            foreach (var child in from Transform child in parentTransform.GetChild(childNum).transform
+                                  where child.gameObject.activeSelf
+                                  select child)
             {
-                if (parentTransform.GetChild(i).gameObject.activeSelf)
-                    parentTransform.GetChild(i).gameObject.SetActive(false);
+                child.gameObject.SetActive(false);
             }
 
             if (colorState != 0 && isAlreadyActive)
             {
-                if (isSlot)
+                if (slotController != null)
                     slotController.slotState = 0;
-                else
-                    //make stuff for links
+                // else
+                //make stuff for links
 
-                parentTransform.GetChild(0).gameObject.SetActive(true);
+                parentTransform.GetChild(childNum).GetChild(0).gameObject.SetActive(true);
             }
             else
             {
-                if(isSlot)
+                if(slotController != null)
                   slotController.slotState = colorState;
-                else
+                //else
                     //make stuff for links
 
-                parentTransform.GetChild(colorState).gameObject.SetActive(true);
+                parentTransform.GetChild(childNum).GetChild(colorState).gameObject.SetActive(true);
             }
         }
     }

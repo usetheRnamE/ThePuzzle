@@ -5,7 +5,7 @@ using MatrixSystem;
 
 namespace SlotSystem
 {
-    public class SlotController : MonoBehaviour, ISlotFunctions
+    public class SlotController : MonoBehaviour, ISlotFunctions, IPointerClickHandler
     {
         [HideInInspector]
         public int slotState; //0 - default; 1 - first colot; 2 - second color
@@ -24,7 +24,7 @@ namespace SlotSystem
             else if (eventData.button == PointerEventData.InputButton.Right)
                 ColorController.Instance.ColorModify(2, gameObject.transform);
 
-            MatrixController.Instance.LinksCheck(this.gameObject, xIdInMatrix, yIdInMatrix);
+           // MatrixController.Instance.LinksCheck(this.gameObject, xIdInMatrix, yIdInMatrix);
         }
 
         public  void LinkDisable(int linkToDisableNum)
