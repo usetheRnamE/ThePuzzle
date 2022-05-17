@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using MatrixSystem;
 using UnityEngine;
 using System.Linq;
 
@@ -11,27 +10,14 @@ namespace SlotSystem
 
         private bool isAlreadyActive;
 
-        SlotController slotController;
+        private SlotController slotController;
+        private MatrixController matrixController;
 
-        #region Singleton
-        private static ColorController instance = null;
-        private static readonly object padlock = new object();
-
-        private ColorController() {}
-
-        public static ColorController Instance
+        private int xID, yID;
+        private void Start()
         {
-            get
-            {
-                lock (padlock)
-                {
-                    instance ??= new ColorController();
-
-                    return instance;
-                }
-            }
+            matrixController = GetComponent<MatrixController>();
         }
-        #endregion
 
         public void ColorModify(int colorState, Transform parentTransform)
         {
@@ -53,6 +39,11 @@ namespace SlotSystem
                 //make stuff for links
 
                 parentTransform.GetChild(childNum).GetChild(0).gameObject.SetActive(true);
+
+                xID = parentTransform.GetComponent<SlotController>().xIdInMatrix;
+                yID = parentTransform.GetComponent<SlotController>().yIdInMatrix;
+
+                matrixController.LinksCheck(parentTransform.gameObject, xID, yID);
             }
             else
             {

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Interfaces;
+using MatrixSystem;
 
 namespace SlotSystem
 {
@@ -16,6 +17,13 @@ namespace SlotSystem
         [HideInInspector]
         public int xIdInMatrix, yIdInMatrix;
 
+        private ColorController colorController;
+
+        private void Start()
+        {
+            colorController = FindObjectOfType<ColorController>();
+        }
+
         public void LinkDisable(int linkToDisableNum)
         {
             slotLinks[linkToDisableNum].SetActive(false);
@@ -23,7 +31,7 @@ namespace SlotSystem
 
         public void GetLinked(int linkToTied, int colorState)
         {
-           ColorController.Instance.ColorModify(colorState, slotLinks[linkToTied].transform);
+            colorController.ColorModify(colorState, slotLinks[linkToTied].transform);            
         }
     }
 }

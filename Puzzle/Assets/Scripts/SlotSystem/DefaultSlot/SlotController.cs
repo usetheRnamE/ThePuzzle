@@ -16,15 +16,24 @@ namespace SlotSystem
         [HideInInspector]
         public int xIdInMatrix, yIdInMatrix;
 
+        private ColorController colorController;
+        private MatrixController matrixController;
+
+        private void Start()
+        {
+            colorController = FindObjectOfType<ColorController>();
+            matrixController = FindObjectOfType<MatrixController>();
+        }
+
         public void OnPointerClick(PointerEventData eventData)
         {
             if (eventData.button == PointerEventData.InputButton.Left)
-                ColorController.Instance.ColorModify(1, gameObject.transform);
+                colorController.ColorModify(1, gameObject.transform);
 
             else if (eventData.button == PointerEventData.InputButton.Right)
-                ColorController.Instance.ColorModify(2, gameObject.transform);
+                colorController.ColorModify(2, gameObject.transform);
 
-           // MatrixController.Instance.LinksCheck(this.gameObject, xIdInMatrix, yIdInMatrix);
+            matrixController.LinksCheck(this.gameObject, xIdInMatrix, yIdInMatrix);
         }
 
         public  void LinkDisable(int linkToDisableNum)
@@ -34,7 +43,7 @@ namespace SlotSystem
 
         public  void GetLinked(int linkToTied, int colorState)
         {
-            ColorController.Instance.ColorModify(colorState, slotLinks[linkToTied].transform);
+            colorController.ColorModify(colorState, slotLinks[linkToTied].transform);      
         }       
     }
 }

@@ -5,26 +5,6 @@ namespace MatrixSystem
 {
     public class MatrixController : MonoBehaviour
     {
-        #region Singleton
-        private static MatrixController instance = null;
-        private static readonly object padlock = new object();
-
-        private MatrixController() { }
-
-        public static MatrixController Instance
-        {
-            get
-            {
-                lock (padlock)
-                {
-                    instance ??= new MatrixController();
-
-                    return instance;
-                }
-            }
-        }
-        #endregion
-
         private const int linksInArray = 4;
 
         private GameObject[,] slotsMatrix;
@@ -109,11 +89,12 @@ namespace MatrixSystem
                 {
                     if (xNeighborIndex == xMatrixIndex)
                         xNeighborIndex++;
-
+                   
                     rowNeighborController = slotsMatrix[yMatrixIndex, xNeighborIndex].GetComponent<SlotController>();
                     rowNeighborColoredController = slotsMatrix[yMatrixIndex, xNeighborIndex].GetComponent<ColoredSlotController>();
 
                     GetLinkedCheck(linkNum, linkNum == 0 ? 1 : 0, rowNeighborController, rowNeighborColoredController);
+                    
                 }
 
                 else if (linkNum >= 2 && yNeighborIndex >= 0 && yNeighborIndex < inLineNeighborCount)
@@ -146,11 +127,21 @@ namespace MatrixSystem
                 {
                     currentSlotController.GetLinked(linkNum, currentSlotController.slotState);
                     neighborSlotController.GetLinked(invertedLinkNum, currentSlotController.slotState);
-                }
-                else if (rowNeighborController == null && currentSlotController.slotState == neighborColoredSlotController.slotState)
+                }           
+                else if (neighborSlotController == null && currentSlotController.slotState == neighborColoredSlotController.slotState)
                 {
                     currentSlotController.GetLinked(linkNum, currentSlotController.slotState);
                     neighborColoredSlotController.GetLinked(invertedLinkNum, currentSlotController.slotState);
+                }
+                else if (neighborSlotController != null)
+                {
+                    currentSlotController.GetLinked(linkNum, 0);
+                    neighborSlotController.GetLinked(invertedLinkNum, 0);
+                }
+                else
+                {
+                    currentSlotController.GetLinked(linkNum, 0);
+                    neighborColoredSlotController.GetLinked(invertedLinkNum, 0);
                 }
             }
             else
@@ -164,6 +155,16 @@ namespace MatrixSystem
                 {
                     currentColoredSlotController.GetLinked(linkNum, currentColoredSlotController.slotState);
                     neighborColoredSlotController.GetLinked(invertedLinkNum, currentColoredSlotController.slotState);
+                }
+                else if (neighborSlotController != null)
+                {
+                    currentColoredSlotController.GetLinked(linkNum, 0);
+                    neighborSlotController.GetLinked(invertedLinkNum, 0);
+                }
+                else
+                {
+                    currentColoredSlotController.GetLinked(linkNum, 0);
+                    neighborColoredSlotController.GetLinked(invertedLinkNum, 0);
                 }
             }
        }
