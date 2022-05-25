@@ -9,7 +9,7 @@ namespace SlotSystem
     public class Slot : MonoBehaviour, ISlotFunctions, IPointerClickHandler
     {
         [HideInInspector]
-        public int slotState; //0 - default; 1 - first colot; 2 - second color
+        public int slotState = 0; //0 - default; 1 - first colot; 2 - second color
 
         [HideInInspector]
         public GameObject[] slotLinks;
@@ -34,11 +34,11 @@ namespace SlotSystem
         public void OnPointerClick(PointerEventData eventData)
         {
             if (eventData.button == PointerEventData.InputButton.Left)
-                colorController.ColorModify(1, GetComponent<ISlotFunctions>());
-
+                colorController.ColorModify(1, this, null);           
+             
             else if (eventData.button == PointerEventData.InputButton.Right)
-                colorController.ColorModify(2, this);
-
+                colorController.ColorModify(2, this, null);
+                    
             matrixController.LinksCheck(this, xId, yId);
         }
 
@@ -49,7 +49,7 @@ namespace SlotSystem
 
         public  void GetLinked(int linkToTied, int colorState)
         {
-           // colorController.ColorModify(colorState, slotLinks[linkToTied].transform);      
+            colorController.ColorModify(colorState, this, slotLinks[linkToTied]);      
         }
 
         public int GetSlotState()
@@ -67,6 +67,11 @@ namespace SlotSystem
             return colors;
         }
 
+        public Color GetCurrentColor()
+        {
+            return image.color;
+        }
+
         public void SetColor(Color colorToSet)
         {
             image.color = colorToSet;
@@ -76,6 +81,11 @@ namespace SlotSystem
         {
             xId = xID;
             yId = yID;
+        }
+
+        public Vector2Int GetSlotID()
+        {
+            return new Vector2Int(xId, yId);
         }
 
         public void SetLinks(GameObject[] links)

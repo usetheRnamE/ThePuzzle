@@ -1,29 +1,31 @@
 using SlotSystem;
 using UnityEngine;
 using Interfaces;
+using System.Collections.Generic;
 
 namespace MatrixSystem
 {
-   [RequireComponent(typeof(LinksInARowController))]
+   [RequireComponent(typeof(ColorManager))]
     public class MatrixController : MonoBehaviour
     {
         private const int linksInArray = 4;
 
-        private GameObject[,] slotsMatrix;
+        [HideInInspector]
+        public ISlotFunctions[,] interfaceMatrix;
 
         private const int inLineNeighborCount = 2, inLineLinksCount = 2;
 
         private int xNeighborIndex, yNeighborIndex;
 
-        private LinksInARowController linksInARowController;
-
         public int xSize, ySize;
+
+        private List<ISlotFunctions> firstColorLinksInARow;
+
+        private List<ISlotFunctions> secondColorLinksInARow;
 
         private void Start()
         {
             MatrixSet();
-
-            linksInARowController = GetComponent<LinksInARowController>();
         }
 
         #region MatrixSet
@@ -33,7 +35,7 @@ namespace MatrixSystem
 
             int length = 0;
 
-            slotsMatrix = new GameObject[ySize, xSize];
+            interfaceMatrix = new ISlotFunctions[ySize, xSize];
 
             for (int y = 0; y < ySize; y++)
             {
@@ -45,12 +47,10 @@ namespace MatrixSystem
 
                     if (slotGameObject != null)
                     {
-                        slotsMatrix[y, x] = slotGameObject;
-                      
-                        ISlotFunctions slotInterface = slotGameObject.GetComponent<ISlotFunctions>();
+                        interfaceMatrix[y, x] = slotGameObject.GetComponent<ISlotFunctions>();                                           
 
-                        if (slotInterface != null)
-                            slotInterface.SetSlotID(x, y);                                           
+                        if (interfaceMatrix[y, x] != null)
+                            interfaceMatrix[y, x].SetSlotID(x, y);                                           
                     }
                 }
             }
@@ -88,13 +88,9 @@ namespace MatrixSystem
         #region MatrixUpdate
         private void MatrixUpdate()
         {
-            for (int y = 0; y < slotsMatrix.GetLength(1); y++)
-            {
-                for (int x = 0; x < slotsMatrix.GetLength(0); x++)
-                {
-                    LinksCheck(slotsMatrix[y, x].GetComponent<ISlotFunctions>(), x, y);
-                }
-            }
+            for (int y = 0; y < interfaceMatrix.GetLength(1); y++)
+                for (int x = 0; x < interfaceMatrix.GetLength(0); x++)
+                    LinksCheck(interfaceMatrix[y, x], x, y);
         }
 
         public void LinksCheck(ISlotFunctions currentInterface, int xMatrixIndex, int yMatrixIndex)
@@ -111,16 +107,16 @@ namespace MatrixSystem
                     if (xNeighborIndex == xMatrixIndex)
                         xNeighborIndex++;
 
-                    neighborInterface = slotsMatrix[yMatrixIndex, xNeighborIndex].GetComponent<ISlotFunctions>();
+                    neighborInterface = interfaceMatrix[yMatrixIndex, xNeighborIndex];
 
-                    GetLinkedCheck(linkNum, linkNum == 0 ? 1 : 0, neighborInterface, currentInterface);            
+                    GetLinkedCheck(linkNum, linkNum == 0 ? 1 : 0, neighborInterface, currentInterface);                    
                 }
                 else if (linkNum >= inLineLinksCount && yNeighborIndex >= 0 && yNeighborIndex < inLineNeighborCount)
                 {
                     if (yNeighborIndex == yMatrixIndex)
                         yNeighborIndex++;
 
-                    neighborInterface = slotsMatrix[yNeighborIndex, xMatrixIndex].GetComponent<ISlotFunctions>();
+                    neighborInterface = interfaceMatrix[yNeighborIndex, xMatrixIndex];
 
                     GetLinkedCheck(linkNum, linkNum == 2 ? 3 : 2, neighborInterface, currentInterface);
                 }
@@ -132,18 +128,78 @@ namespace MatrixSystem
         }
        private void GetLinkedCheck(int linkNum, int invertedLinkNum, ISlotFunctions neighborInterface, ISlotFunctions currentInterface)
        {
-            if (neighborInterface != null)
+          if (currentInterface.GetSlotState() == neighborInterface.GetSlotState())
+          { 
+              currentInterface.GetLinked(linkNum, currentInterface.GetSlotState());
+              neighborInterface.GetLinked(invertedLinkNum, currentInterface.GetSlotState());
+          }
+          else
+          {
+              currentInterface.GetLinked(linkNum, 0);
+              neighborInterface.GetLinked(invertedLinkNum, 0);
+          }        
+        }
+        #endregion
+
+        #region SlotsInARowFind
+       
+        public void FindSlotInARow(int xColoredID, int yColoredID)
+        {
+            ISlotFunctions coloredInterface = interfaceMatrix[xColoredID, yColoredID];
+
+            for (int linkNum = 0; linkNum < linksInArray; linkNum++)
             {
-                if (currentInterface.GetSlotState() == neighborInterface.GetSlotState())
+                xNeighborIndex = (xColoredID - 1 + linkNum);
+                yNeighborIndex = (yColoredID - 1 - inLineLinksCount + linkNum);
+
+                ISlotFunctions neighborInterface;
+
+                if (linkNum < inLineLinksCount && xNeighborIndex >= 0 && xNeighborIndex < inLineNeighborCount)
                 {
-                    currentInterface.GetLinked(linkNum, currentInterface.GetSlotState());
-                    neighborInterface.GetLinked(invertedLinkNum, currentInterface.GetSlotState());                          
+                    if (xNeighborIndex == xColoredID)
+                        xNeighborIndex++;
+
+                    neighborInterface = interfaceMatrix[yColoredID, xNeighborIndex];
+
+                    CheckSloteState(coloredInterface, neighborInterface);
+                }
+                else if (linkNum >= inLineLinksCount && yNeighborIndex >= 0 && yNeighborIndex < inLineNeighborCount)
+                {
+                    if (yNeighborIndex == yColoredID)
+                        yNeighborIndex++;
+
+                    neighborInterface = interfaceMatrix[yNeighborIndex, xColoredID];
+
+                    CheckSloteState(coloredInterface, neighborInterface);
                 }
             }
-            else
+        }
+
+        private void CheckSloteState(ISlotFunctions coloredInterface, ISlotFunctions neighborInterface)
+        {
+            if (coloredInterface.GetSlotState() == neighborInterface.GetSlotState())
             {
-                currentInterface.GetLinked(linkNum, 0);
-                neighborInterface.GetLinked(invertedLinkNum, 0);
+                AddToList(neighborInterface, neighborInterface.GetSlotState());
+
+                FindSlotInARow(neighborInterface.GetSlotID().x, neighborInterface.GetSlotID().y);
+            }
+        }
+
+        private void AddToList(ISlotFunctions interfaceToAdd, int colorNum)
+        {
+            switch (colorNum)
+            {
+                case 1: firstColorLinksInARow.Add(interfaceToAdd); break;
+                case 2: secondColorLinksInARow.Add(interfaceToAdd); break;
+            }
+        }
+
+        private void RemoveFromList(ISlotFunctions interfaceToAdd, int colorNum)
+        {
+            switch (colorNum)
+            {
+                case 1: firstColorLinksInARow.Remove(interfaceToAdd); break;
+                case 2: secondColorLinksInARow.Remove(interfaceToAdd); break;
             }
         }
         #endregion

@@ -618,7 +618,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1216605213}
   - component: {fileID: 1216605214}
-  - component: {fileID: 1216605216}
+  - component: {fileID: 1216605217}
   - component: {fileID: 1216605215}
   m_Layer: 5
   m_Name: Grid
@@ -693,7 +693,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   xSize: 3
   ySize: 3
---- !u!114 &1216605216
+--- !u!114 &1216605217
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -702,11 +702,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1216605212}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 374382e4152981b4f8bf0021531a3dbc, type: 3}
+  m_Script: {fileID: 11500000, guid: 5cd6481918514f64182543574f876d02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  firstColorLinksInARow: []
-  secondColorLinksInARow: []
 --- !u!1001 &1314658096
 PrefabInstance:
   m_ObjectHideFlags: 0

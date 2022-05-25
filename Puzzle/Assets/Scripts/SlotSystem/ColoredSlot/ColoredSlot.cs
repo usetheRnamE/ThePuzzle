@@ -20,12 +20,15 @@ namespace SlotSystem
         public Color[] colors;
 
         private ColorManager colorController;
+        private MatrixController matrixController;
 
         private Image image;
 
         private void Start()
         {
             colorController = FindObjectOfType<ColorManager>();
+            matrixController = FindObjectOfType<MatrixController>();
+
             image = GetComponent<Image>();
         }
 
@@ -36,7 +39,10 @@ namespace SlotSystem
 
         public void GetLinked(int linkToTied, int colorState)
         {
-            //colorController.ColorModify(colorState, slotLinks[linkToTied].transform);            
+            colorController.ColorModify(colorState, this, slotLinks[linkToTied]);
+
+            if (colorState != 0)
+                matrixController.FindSlotInARow(xId, yId);
         }
 
         public int GetSlotState()
@@ -46,12 +52,17 @@ namespace SlotSystem
 
         public void SetSlotState(int slotStateToSet)
         {
-            slotState = slotStateToSet;
+            return;
         }
 
         public Color[] GetColor()
         {
             return colors;
+        }
+
+        public Color GetCurrentColor()
+        {
+            return image.color;
         }
 
         public void SetColor(Color colorToSet)
@@ -63,6 +74,11 @@ namespace SlotSystem
         {
             xId = xID;
             yId = yID;
+        }
+
+        public Vector2Int GetSlotID()
+        {
+            return new Vector2Int(xId, yId);
         }
 
         public void SetLinks(GameObject[] links)

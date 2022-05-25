@@ -1,16 +1,12 @@
 using MatrixSystem;
 using UnityEngine;
-using System.Linq;
 using Interfaces;
+using UnityEngine.UI;
 
 namespace SlotSystem
 {
     public class ColorManager : MonoBehaviour
     {
-        private const int childNum = 0;
-
-        private bool isAlreadyActive;
-
         private MatrixController matrixController;
 
         private int xID, yID;
@@ -20,11 +16,30 @@ namespace SlotSystem
             matrixController = GetComponent<MatrixController>();
         }
 
-        public void ColorModify(int colorState, ISlotFunctions currentInterface)
+        public void ColorModify(int colorState, ISlotFunctions currentInterface, GameObject link)
         {
-            currentInterface.SetColor(currentInterface.GetColor()[colorState]);
-               // matrixController.LinksCheck(parentInterface, xID, yID);
+            if (link == null)
+            {
+                if (currentInterface.GetCurrentColor() == currentInterface.GetColor()[colorState])
+                {
+                    currentInterface.SetColor(currentInterface.GetColor()[0]);
 
+                    currentInterface.SetSlotState(0);
+                }
+                else
+                {
+                    currentInterface.SetSlotState(colorState);
+
+                    currentInterface.SetColor(currentInterface.GetColor()[colorState]);
+                }              
+
+                xID = (int)currentInterface.GetSlotID().x;
+                yID = (int)currentInterface.GetSlotID().y;
+
+                matrixController.LinksCheck(currentInterface, xID, yID);
+            }
+            else
+                link.GetComponent<Image>().color = currentInterface.GetColor()[colorState];
         }
     }
 }
