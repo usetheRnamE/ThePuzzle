@@ -1,15 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
+using MatrixSystem;
 using UnityEngine;
 using Interfaces;
-using MatrixSystem;
 using UnityEngine.UI;
+using TMPro;
 
 namespace SlotSystem
 {
     public class ColoredSlot : MonoBehaviour, ISlotFunctions
     {
         public int slotState; // 1 - first color; 2 - second color 
+
+        public int requiredLinksCount;
 
         [HideInInspector]
         public GameObject[] slotLinks;
@@ -19,17 +20,49 @@ namespace SlotSystem
 
         public Color[] colors;
 
+        private TMP_Text linkedCountText;
+
         private ColorManager colorController;
-        private MatrixController matrixController;
+        private MatrixController matrixController; 
 
         private Image image;
+
+        private int firstLinksCount = -1, secondLinksCount = -1;
 
         private void Start()
         {
             colorController = FindObjectOfType<ColorManager>();
             matrixController = FindObjectOfType<MatrixController>();
 
+            linkedCountText = GetComponentInChildren<TMP_Text>();
+
             image = GetComponent<Image>();
+        }
+
+        private void Update()
+        {
+            if (matrixController.firstColorLinksInARow.Count == firstLinksCount || matrixController.secondColorLinksInARow.Count == secondLinksCount)
+                return;
+
+            ChangeLinkedCountText();
+        }
+
+        private void ChangeLinkedCountText()
+        {
+            switch (slotState)
+            {
+                case 1: 
+                    linkedCountText.text = matrixController.firstColorLinksInARow.Count.ToString() + "/" + Mathf.Abs(requiredLinksCount).ToString();
+
+                    firstLinksCount = matrixController.firstColorLinksInARow.Count;
+                    break;
+
+                case 2: 
+                    linkedCountText.text = matrixController.secondColorLinksInARow.Count.ToString() + "/" + Mathf.Abs(requiredLinksCount).ToString();
+
+                    secondLinksCount = matrixController.secondColorLinksInARow.Count; 
+                    break;
+            }    
         }
 
         public void LinkDisable(int linkToDisableNum)
@@ -40,9 +73,6 @@ namespace SlotSystem
         public void GetLinked(int linkToTied, int colorState)
         {
             colorController.ColorModify(colorState, this, slotLinks[linkToTied]);
-
-            if (colorState != 0)
-                matrixController.FindSlotInARow(xId, yId);
         }
 
         public int GetSlotState()

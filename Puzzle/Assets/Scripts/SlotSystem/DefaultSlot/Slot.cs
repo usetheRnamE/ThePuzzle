@@ -19,14 +19,14 @@ namespace SlotSystem
 
         public Color[] colors;
 
-        private ColorManager colorController;
+        private ColorManager colorManager;
         private MatrixController matrixController;
 
         private Image image;
 
         private void Start()
         {
-            colorController = FindObjectOfType<ColorManager>();
+            colorManager = FindObjectOfType<ColorManager>();
             matrixController = FindObjectOfType<MatrixController>();
             image = GetComponent<Image>();
         }
@@ -34,10 +34,10 @@ namespace SlotSystem
         public void OnPointerClick(PointerEventData eventData)
         {
             if (eventData.button == PointerEventData.InputButton.Left)
-                colorController.ColorModify(1, this, null);           
+                colorManager.ColorModify(1, this, null);           
              
             else if (eventData.button == PointerEventData.InputButton.Right)
-                colorController.ColorModify(2, this, null);
+                colorManager.ColorModify(2, this, null);
                     
             matrixController.LinksCheck(this, xId, yId);
         }
@@ -49,7 +49,7 @@ namespace SlotSystem
 
         public  void GetLinked(int linkToTied, int colorState)
         {
-            colorController.ColorModify(colorState, this, slotLinks[linkToTied]);      
+            colorManager.ColorModify(colorState, this, slotLinks[linkToTied]);     
         }
 
         public int GetSlotState()

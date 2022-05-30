@@ -2,6 +2,7 @@ using SlotSystem;
 using UnityEngine;
 using Interfaces;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MatrixSystem
 {
@@ -19,9 +20,11 @@ namespace MatrixSystem
 
         public int xSize, ySize;
 
-        private List<ISlotFunctions> firstColorLinksInARow;
+        [HideInInspector]
+        public List<ISlotFunctions> firstColorLinksInARow = new List<ISlotFunctions>();
 
-        private List<ISlotFunctions> secondColorLinksInARow;
+        [HideInInspector]
+        public List<ISlotFunctions> secondColorLinksInARow = new List<ISlotFunctions>();
 
         private void Start()
         {
@@ -129,68 +132,38 @@ namespace MatrixSystem
        private void GetLinkedCheck(int linkNum, int invertedLinkNum, ISlotFunctions neighborInterface, ISlotFunctions currentInterface)
        {
           if (currentInterface.GetSlotState() == neighborInterface.GetSlotState())
-          { 
+          {
+              AddToList(neighborInterface, currentInterface.GetSlotState());
+              AddToList(currentInterface, currentInterface.GetSlotState());
+
               currentInterface.GetLinked(linkNum, currentInterface.GetSlotState());
               neighborInterface.GetLinked(invertedLinkNum, currentInterface.GetSlotState());
-          }
+
+            }
           else
           {
+              RemoveFromList(neighborInterface, currentInterface.GetSlotState());
+              RemoveFromList(currentInterface, currentInterface.GetSlotState());
+
               currentInterface.GetLinked(linkNum, 0);
-              neighborInterface.GetLinked(invertedLinkNum, 0);
-          }        
+              neighborInterface.GetLinked(invertedLinkNum, 0);             
+            }        
         }
         #endregion
 
-        #region SlotsInARowFind
-       
-        public void FindSlotInARow(int xColoredID, int yColoredID)
-        {
-            ISlotFunctions coloredInterface = interfaceMatrix[xColoredID, yColoredID];
-
-            for (int linkNum = 0; linkNum < linksInArray; linkNum++)
-            {
-                xNeighborIndex = (xColoredID - 1 + linkNum);
-                yNeighborIndex = (yColoredID - 1 - inLineLinksCount + linkNum);
-
-                ISlotFunctions neighborInterface;
-
-                if (linkNum < inLineLinksCount && xNeighborIndex >= 0 && xNeighborIndex < inLineNeighborCount)
-                {
-                    if (xNeighborIndex == xColoredID)
-                        xNeighborIndex++;
-
-                    neighborInterface = interfaceMatrix[yColoredID, xNeighborIndex];
-
-                    CheckSloteState(coloredInterface, neighborInterface);
-                }
-                else if (linkNum >= inLineLinksCount && yNeighborIndex >= 0 && yNeighborIndex < inLineNeighborCount)
-                {
-                    if (yNeighborIndex == yColoredID)
-                        yNeighborIndex++;
-
-                    neighborInterface = interfaceMatrix[yNeighborIndex, xColoredID];
-
-                    CheckSloteState(coloredInterface, neighborInterface);
-                }
-            }
-        }
-
-        private void CheckSloteState(ISlotFunctions coloredInterface, ISlotFunctions neighborInterface)
-        {
-            if (coloredInterface.GetSlotState() == neighborInterface.GetSlotState())
-            {
-                AddToList(neighborInterface, neighborInterface.GetSlotState());
-
-                FindSlotInARow(neighborInterface.GetSlotID().x, neighborInterface.GetSlotID().y);
-            }
-        }
-
+        #region SlotsInARowFind     
         private void AddToList(ISlotFunctions interfaceToAdd, int colorNum)
         {
             switch (colorNum)
             {
-                case 1: firstColorLinksInARow.Add(interfaceToAdd); break;
-                case 2: secondColorLinksInARow.Add(interfaceToAdd); break;
+                case 1:
+                    if (!firstColorLinksInARow.Contains(interfaceToAdd))
+                        firstColorLinksInARow.Add(interfaceToAdd);
+                    break;
+                case 2:
+                    if (!secondColorLinksInARow.Contains(interfaceToAdd))
+                        secondColorLinksInARow.Add(interfaceToAdd); 
+                    break;
             }
         }
 
@@ -198,8 +171,14 @@ namespace MatrixSystem
         {
             switch (colorNum)
             {
-                case 1: firstColorLinksInARow.Remove(interfaceToAdd); break;
-                case 2: secondColorLinksInARow.Remove(interfaceToAdd); break;
+                case 1:
+                    if(firstColorLinksInARow.Contains(interfaceToAdd))
+                       firstColorLinksInARow.Remove(interfaceToAdd); 
+                    break;
+                case 2:
+                    if (secondColorLinksInARow.Contains(interfaceToAdd))
+                        secondColorLinksInARow.Remove(interfaceToAdd); 
+                    break;
             }
         }
         #endregion
